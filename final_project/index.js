@@ -1,9 +1,9 @@
 const express = require('express');
 const jwt = require('jsonwebtoken');
 const session = require('express-session')
-// Ensure these two files exist with these exact names in the same directory
-const customer_routes = require('./auth_users.js').authenticated;
-const genl_routes = require('./general.js').general; 
+// The paths are corrected here to include the 'router/' subdirectory
+const customer_routes = require('./router/auth_users.js').authenticated;
+const genl_routes = require('./router/general.js').general; 
 
 const app = express();
 
@@ -31,7 +31,8 @@ app.use("/customer/auth/*", function auth(req,res,next){
     }
 });
  
-const PORT =5000;
+// Use the port provided by the environment (for hosting), or default to 5000 for local development.
+const PORT = process.env.PORT || 5000;
 
 // Mount public routes first, including the root '/'
 app.use("/", genl_routes);
