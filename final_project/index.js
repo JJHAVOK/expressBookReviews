@@ -1,20 +1,24 @@
 const express = require('express');
 const jwt = require('jsonwebtoken');
 const session = require('express-session')
-const customer_routes = require('./router/auth_users.js').authenticated;
-const genl_routes = require('./router/general.js').general;
+// Ensure these two files exist with these exact names in the same directory
+const customer_routes = require('./auth_users.js').authenticated;
+const genl_routes = require('./general.js').general; 
 
 const app = express();
 
 app.use(express.json());
 
+// Session middleware setup
 app.use("/customer",session({secret:"fingerprint_customer",resave: true, saveUninitialized: true}))
 
+// AUTHENTICATION MIDDLEWARE
 app.use("/customer/auth/*", function auth(req,res,next){
     if(req.session.authorization) { // Check if the authorization object exists in the session
         let token = req.session.authorization['accessToken']; // Get the token
         
-        jwt.verify(token, "access", (err, user) => { // Verify the token. Assuming "access" is the secret key used when creating the JWT.
+        // Assuming the secret key is 'access' as used in auth_users.js
+        jwt.verify(token, "access", (err, user) => { 
             if (!err) {
                 req.user = user; // Attach the decoded user payload to the request
                 next(); // Proceed to the next middleware/route handler
@@ -29,7 +33,10 @@ app.use("/customer/auth/*", function auth(req,res,next){
  
 const PORT =5000;
 
-app.use("/customer", customer_routes);
+// Mount public routes first, including the root '/'
 app.use("/", genl_routes);
 
-app.listen(PORT,()=>console.log("Server is running"));
+// Mount authenticated customer routes under /customer
+app.use("/customer", customer_routes);
+
+app.listen(PORT,()=>console.log("Server is running on port " + PORT));
