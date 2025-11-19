@@ -12,7 +12,11 @@ function getBookList() {
     return new Promise((resolve, reject) => {
         // Simulate network delay
         setTimeout(() => {
-            resolve(books);
+            if (Object.keys(books).length > 0) {
+                resolve(books);
+            } else {
+                reject(new Error("No books found."));
+            }
         }, 600);
     });
 }
@@ -82,7 +86,7 @@ function getBooksByTitle(title) {
 }
 
 
-// Task 6: Register a new user (Synchronous - requires user mutation)
+// Task 6: Register a new user (Synchronous)
 public_users.post("/register", (req,res) => {
     const username = req.body.username;
     const password = req.body.password;
@@ -102,10 +106,9 @@ public_users.post("/register", (req,res) => {
 public_users.get('/', async function (req, res) {
     try {
         const bookList = await getBookList();
-        // Returning JSON directly without JSON.stringify since Express does it automatically
         return res.status(200).json(bookList);
     } catch (error) {
-        return res.status(500).json({message: "An error occurred while fetching the book list."});
+        return res.status(404).json({message: error.message});
     }
 });
 
@@ -129,7 +132,6 @@ public_users.get('/author/:author',function (req, res) {
             return res.status(200).json(result);
         })
         .catch(error => {
-            // Uses 404 since the error message indicates not found
             return res.status(404).json({message: error.message});
         });
 });
